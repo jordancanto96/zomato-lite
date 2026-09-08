@@ -34,21 +34,21 @@ export async function GET(
     WHERE restaurant_id = ${restaurantId}
   `;
 
-  const latestRows = await sql<ReviewRow[]>`
+  const latestRows = (await sql`
     SELECT id, rating, comment, created_at
     FROM reviews
     WHERE restaurant_id = ${restaurantId}
     ORDER BY created_at DESC, id DESC
     LIMIT 1
-  `;
+  `) as ReviewRow[];
 
-  const olderRows = await sql<ReviewRow[]>`
+  const olderRows = (await sql`
     SELECT id, rating, comment, created_at
     FROM reviews
     WHERE restaurant_id = ${restaurantId}
     ORDER BY created_at DESC, id DESC
     OFFSET 1
-  `;
+  `) as ReviewRow[];
 
   const restaurant = restaurants[0];
   const statsRow = stats[0];
