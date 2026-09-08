@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 
 type Review = {
   id: number;
@@ -17,10 +18,11 @@ type RestaurantData = {
   reviews: Review[];
 };
 
-function baseUrl() {
-  return process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
+async function baseUrl() {
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
+  const proto = headersList.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${host}`;
 }
 
 function formatDate(iso: string) {
@@ -52,7 +54,7 @@ export default async function RestaurantPage({
 
   let data: RestaurantData | "missing" | "error" = "error";
   try {
-    const res = await fetch(`${baseUrl()}/api/restaurants/${id}`, {
+    const res = await fetch(`${await baseUrl()}/api/restaurants/${id}`, {
       cache: "no-store",
     });
     if (res.ok) {

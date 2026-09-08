@@ -1,13 +1,15 @@
+import { headers } from "next/headers";
 import ReviewForm from "./ReviewForm";
 
 async function getRestaurantName(id: string): Promise<string | null> {
-  const base = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
+  const proto = headersList.get("x-forwarded-proto") ?? "http";
   try {
-    const res = await fetch(`${base}/api/restaurants/${id}`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${proto}://${host}/api/restaurants/${id}`,
+      { cache: "no-store" }
+    );
     if (!res.ok) return null;
     const data = await res.json();
     return data.name;
